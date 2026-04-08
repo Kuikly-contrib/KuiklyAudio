@@ -1,10 +1,10 @@
 #import <Foundation/Foundation.h>
 
 // 兼容 kuikly-open 和 kuikly 内部版
-#if __has_include(<OpenKuiklyIOSRender/KuiklyRenderBaseModule.h>)
-#import <OpenKuiklyIOSRender/KuiklyRenderBaseModule.h>
-#elif __has_include(<KuiklyIOSRender/KuiklyRenderBaseModule.h>)
-#import <KuiklyIOSRender/KuiklyRenderBaseModule.h>
+#if __has_include(<OpenKuiklyIOSRender/KRBaseModule.h>)
+#import <OpenKuiklyIOSRender/KRBaseModule.h>
+#elif __has_include(<KuiklyIOSRender/KRBaseModule.h>)
+#import <KuiklyIOSRender/KRBaseModule.h>
 #endif
 
 NS_ASSUME_NONNULL_BEGIN
@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * ⚠️ 类名必须与 DSL 层 moduleName() 返回值一致
  */
-@interface KRAudioPlayerModule : KuiklyRenderBaseModule
+@interface KRAudioPlayerModule : KRBaseModule
 
 @end
 

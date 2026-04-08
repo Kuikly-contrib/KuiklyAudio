@@ -47,7 +47,7 @@ kotlin {
             dependencies {
                 implementation("com.tencent.kuikly-open:core:${Version.getKuiklyOhosVersion()}")
                 implementation("com.tencent.kuikly-open:core-annotations:${Version.getKuiklyOhosVersion()}")
-
+                implementation(project(":KuiklyAudio"))
             }
         }
         val commonTest by getting {

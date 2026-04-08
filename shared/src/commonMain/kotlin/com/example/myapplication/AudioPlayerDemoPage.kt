@@ -26,6 +26,7 @@ internal class AudioPlayerDemoPage : BasePager() {
     private var currentPlayMode: AudioPlayMode by observable(AudioPlayMode.SEQUENCE)
     private var volume: Float by observable(1.0f)
     private var speed: Float by observable(1.0f)
+    private var isSeeking: Boolean = false
 
     // 播放列表
     private val playlist = listOf(
@@ -199,14 +200,15 @@ internal class AudioPlayerDemoPage : BasePager() {
                             thumbColor(Color(0xFF1E88E5))
                         }
                         event {
+                            beginDragSlider {
+                                ctx.isSeeking = true
+                            }
                             endDragSlider {
-                                if (ctx.duration > 0) {
-                                    val progress = ctx.currentPosition.toFloat() / ctx.duration.toFloat()
-                                    // seekTo 由拖拽结束时计算
-                                }
+                                ctx.isSeeking = false
                             }
                             progressDidChanged { progress ->
-                                if (ctx.duration > 0) {
+                                // 只在用户拖拽时才 seekTo，代码更新 progress 时不触发
+                                if (ctx.isSeeking && ctx.duration > 0) {
                                     val targetPos = (progress * ctx.duration).toLong()
                                     ctx.audioModule.seekTo(targetPos)
                                 }

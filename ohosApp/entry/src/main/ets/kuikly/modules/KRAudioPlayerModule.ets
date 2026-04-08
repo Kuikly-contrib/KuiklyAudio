@@ -144,6 +144,7 @@ export class KRAudioPlayerModule extends KuiklyRenderBaseModule {
     }
 
     // AVPlayer 已存在，需要回到 idle 状态才能设新 url
+    // 根据 lastReportedState 判断是否需要 reset
     const state = this.lastReportedState;
     if (state === 'idle') {
       // 已经在 idle，直接设置 url
@@ -159,6 +160,7 @@ export class KRAudioPlayerModule extends KuiklyRenderBaseModule {
       this.avPlayer.reset().catch((e: Error) => {
         console.error('KRAudioPlayerModule: reset from error failed', e);
       });
+      // reset 后 stateChange 会到 idle，idle 中会消费 pendingUrl
     } else if (state === 'stopped') {
       // stopped -> reset -> idle
       this.avPlayer.reset().catch((e: Error) => {
@@ -439,7 +441,9 @@ export class KRAudioPlayerModule extends KuiklyRenderBaseModule {
           }
           break;
         case 'initialized':
-          // url 设置后自动进入 initialized，等待 prepared
+          // url 设置后进入 initialized，需要手动调用 prepare() 才能进入 prepared
+          this.reportStateIfChanged('initialized');
+          this.avPlayer?.prepare();
           break;
         case 'prepared':
           // prepared 后设置播放模式，然后自动播放

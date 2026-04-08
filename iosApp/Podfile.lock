@@ -1,4 +1,6 @@
 PODS:
+  - KuiklyAudio (1.0.0):
+    - OpenKuiklyIOSRender (~> 2.7.0)
   - OpenKuiklyIOSRender (2.7.0)
   - SDWebImage (5.21.5):
     - SDWebImage/Core (= 5.21.5)
@@ -6,6 +8,7 @@ PODS:
   - shared (1.0)
 
 DEPENDENCIES:
+  - KuiklyAudio (from `../KuiklyAudioIOS`)
   - OpenKuiklyIOSRender (~> 2.7.0)
   - SDWebImage
   - shared (from `../shared`)
@@ -16,14 +19,17 @@ SPEC REPOS:
     - SDWebImage
 
 EXTERNAL SOURCES:
+  KuiklyAudio:
+    :path: "../KuiklyAudioIOS"
   shared:
     :path: "../shared"
 
 SPEC CHECKSUMS:
+  KuiklyAudio: 3ff46339fa1a9202630ec725a699a683f4b2d05c
   OpenKuiklyIOSRender: 2e6f7be3adae40f8167bb56a3e6803d1b18fd16e
   SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
   shared: 45c4d5a3fe6bf89e105d0ff0f3587f64ad21dd48
 
-PODFILE CHECKSUM: 10010cf4aa421711ee8f708033a2fae94c987409
+PODFILE CHECKSUM: 0b6fc2445526308dab2517d47c5dabc43879468b
 
 COCOAPODS: 1.16.2

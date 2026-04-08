@@ -49,8 +49,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                compileOnly("com.tencent.kuikly-open:core:${Version.getKuiklyVersion()}")
-                compileOnly("com.tencent.kuikly-open:core-annotations:${Version.getKuiklyVersion()}")
+                compileOnly("com.tencent.kuikly-open:core:${Version.getKuiklyOhosVersion()}")
+                compileOnly("com.tencent.kuikly-open:core-annotations:${Version.getKuiklyOhosVersion()}")
             }
         }
         val commonTest by getting {

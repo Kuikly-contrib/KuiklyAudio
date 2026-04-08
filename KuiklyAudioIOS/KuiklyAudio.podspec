@@ -15,6 +15,6 @@ Pod::Spec.new do |s|
   s.source_files = 'Classes/**/*'
   s.frameworks = 'AVFoundation', 'MediaPlayer', 'UIKit'
 
-  # 兼容 kuikly-open 和内部版
-  # 使用方需自行引入 KuiklyIOSRender 或 OpenKuiklyIOSRender
+  # 依赖 Kuikly iOS 渲染层（提供 KuiklyRenderBaseModule 基类）
+  s.dependency 'OpenKuiklyIOSRender', '~> 2.7.0'
 end

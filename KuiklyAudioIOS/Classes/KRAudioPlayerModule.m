@@ -47,7 +47,7 @@ static NSString * const kStateError = @"error";
 
 #pragma mark - Module Dispatch
 
-- (id)call:(NSString *)method params:(NSString *)params callback:(KuiklyRenderCallback)callback {
+- (id)hrv_callWithMethod:(NSString *)method params:(NSString *)params callback:(KuiklyRenderCallback)callback {
     if ([method isEqualToString:@"play"]) {
         [self handlePlay:params];
     } else if ([method isEqualToString:@"pause"]) {
