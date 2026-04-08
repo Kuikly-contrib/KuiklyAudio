@@ -4,7 +4,6 @@ import com.example.myapplication.base.BasePager
 import com.tencent.kuikly.core.annotations.Page
 import com.tencent.kuikly.core.base.*
 import com.tencent.kuikly.core.module.RouterModule
-import com.tencent.kuikly.core.nvi.serialization.json.JSONObject
 import com.tencent.kuikly.core.reactive.handler.*
 import com.tencent.kuikly.core.views.*
 import com.tencent.kuikly.core.views.compose.Button
@@ -17,10 +16,10 @@ import com.tencent.kuiklybase.audio.AudioPlayerModule
 @Page("router", supportInLocal = true)
 internal class AudioPlayerDemoPage : BasePager() {
 
-    // 播放状态
+    // observable 属性驱动 UI 刷新
     private var playState: String by observable("idle")
-    private var currentPosition: Long by observable(0L)
-    private var duration: Long by observable(0L)
+    private var position: Long by observable(0L)
+    private var totalDuration: Long by observable(0L)
     private var currentIndex: Int by observable(0)
     private var errorMsg: String by observable("")
     private var currentPlayMode: AudioPlayMode by observable(AudioPlayMode.SEQUENCE)
@@ -56,31 +55,12 @@ internal class AudioPlayerDemoPage : BasePager() {
         super.created()
         audioModule = acquireModule(AudioPlayerModule.MODULE_NAME)
 
-        // 注册回调
-        audioModule.onPlayStateChanged { data ->
-            if (data != null) {
-                playState = data.optString("state", "idle")
-            }
-        }
-
-        audioModule.onTimeUpdate { data ->
-            if (data != null) {
-                currentPosition = data.optString("current", "0").toLongOrNull() ?: 0L
-                duration = data.optString("duration", "0").toLongOrNull() ?: 0L
-            }
-        }
-
-        audioModule.onError { data ->
-            if (data != null) {
-                errorMsg = data.optString("message", "未知错误")
-            }
-        }
-
-        audioModule.onPlaylistIndexChanged { data ->
-            if (data != null) {
-                currentIndex = data.optString("index", "0").toIntOrNull() ?: 0
-            }
-        }
+        // 注册类型化回调，自动解析 JSON
+        // 回调中赋值给 Pager observable 属性，触发 UI 刷新
+        audioModule.onPlayStateChanged { state -> playState = state }
+        audioModule.onTimeUpdate { pos, dur -> position = pos; totalDuration = dur }
+        audioModule.onError { _, message -> errorMsg = message }
+        audioModule.onPlaylistIndexChanged { index, _, _ -> currentIndex = index }
     }
 
     override fun body(): ViewBuilder {
@@ -171,14 +151,14 @@ internal class AudioPlayerDemoPage : BasePager() {
                         }
                         Text {
                             attr {
-                                text(ctx.formatTime(ctx.currentPosition))
+                                text(ctx.formatTime(ctx.position))
                                 fontSize(12f)
                                 color(Color(0xFF666666))
                             }
                         }
                         Text {
                             attr {
-                                text(ctx.formatTime(ctx.duration))
+                                text(ctx.formatTime(ctx.totalDuration))
                                 fontSize(12f)
                                 color(Color(0xFF666666))
                             }
@@ -189,8 +169,8 @@ internal class AudioPlayerDemoPage : BasePager() {
                         attr {
                             size(pagerData.pageViewWidth - 64f, 30f)
                             currentProgress(
-                                if (ctx.duration > 0) {
-                                    (ctx.currentPosition.toFloat() / ctx.duration.toFloat()).coerceIn(0f, 1f)
+                                if (ctx.totalDuration > 0) {
+                                    (ctx.position.toFloat() / ctx.totalDuration.toFloat()).coerceIn(0f, 1f)
                                 } else {
                                     0f
                                 }
@@ -208,8 +188,8 @@ internal class AudioPlayerDemoPage : BasePager() {
                             }
                             progressDidChanged { progress ->
                                 // 只在用户拖拽时才 seekTo，代码更新 progress 时不触发
-                                if (ctx.isSeeking && ctx.duration > 0) {
-                                    val targetPos = (progress * ctx.duration).toLong()
+                                if (ctx.isSeeking && ctx.totalDuration > 0) {
+                                    val targetPos = (progress * ctx.totalDuration).toLong()
                                     ctx.audioModule.seekTo(targetPos)
                                 }
                             }
@@ -378,7 +358,6 @@ internal class AudioPlayerDemoPage : BasePager() {
                             }
                             event {
                                 click {
-                                    ctx.currentIndex = index
                                     ctx.audioModule.setPlaylist(ctx.playlist, index)
                                 }
                             }
