@@ -21,6 +21,12 @@ val mavenPassword: String = findProperty("mavenPassword") as? String
     ?: findProperty("MAVEN_PASSWORD") as? String
     ?: ""
 
+// 动态 Kotlin / Kuikly Core 版本（发布脚本通过 -PkotlinVersion / -PkuiklyCoreVersion 传入）
+val kotlinVersion: String = findProperty("kotlinVersion") as? String
+    ?: Version.getKotlinVersion()
+val kuiklyCoreVersion: String = findProperty("kuiklyCoreVersion") as? String
+    ?: Version.getKuiklyVersion()
+
 group = groupId
 version = mavenVersion
 
@@ -46,8 +52,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                compileOnly("com.tencent.kuikly-open:core:${Version.getKuiklyVersion()}")
-                compileOnly("com.tencent.kuikly-open:core-annotations:${Version.getKuiklyVersion()}")
+                compileOnly("com.tencent.kuikly-open:core:${kuiklyCoreVersion}")
+                compileOnly("com.tencent.kuikly-open:core-annotations:${kuiklyCoreVersion}")
             }
         }
         val commonTest by getting {

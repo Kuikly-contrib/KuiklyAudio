@@ -4,7 +4,11 @@ plugins {
     `maven-publish`
 }
 
-// 从 Gradle 参数读取发布配置（优先读取命令行 -P 参数，回退到 gradle.properties 大写风格）
+// 动态 Kotlin / Kuikly Core 版本（发布脚本通过 -PkotlinVersion / -PkuiklyCoreVersion 传入）
+val kotlinVersion: String = findProperty("kotlinVersion") as? String
+    ?: Version.getKotlinOhosCompilerVersion()
+val kuiklyCoreVersion: String = findProperty("kuiklyCoreVersion") as? String
+    ?: Version.getKuiklyOhosVersion()
 val mavenVersion: String = findProperty("mavenVersion") as? String
     ?: findProperty("MAVEN_VERSION") as? String
     ?: "1.0.0"
@@ -49,8 +53,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                compileOnly("com.tencent.kuikly-open:core:${Version.getKuiklyOhosVersion()}")
-                compileOnly("com.tencent.kuikly-open:core-annotations:${Version.getKuiklyOhosVersion()}")
+                compileOnly("com.tencent.kuikly-open:core:${kuiklyCoreVersion}")
+                compileOnly("com.tencent.kuikly-open:core-annotations:${kuiklyCoreVersion}")
             }
         }
         val commonTest by getting {

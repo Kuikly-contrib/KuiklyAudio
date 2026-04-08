@@ -44,14 +44,15 @@ KOTLIN_VERSION_LIST=""
 # 支持 ohos 的 Kotlin 版本列表
 OHOS_KOTLIN_VERSION_LIST=""
 
-# 默认 Kuikly Core 版本
-DEFAULT_KUIKLY_CORE_VERSION="2.7.0"
+# Kuikly Core 鸿蒙版本后缀（从 gradle.properties 读取）
+KUIKLY_OHOS_VERSION_SUFFIX="2.0.21-ohos"
 
 # publish 任务
 PUBLISH_TASK=publishAllPublicationsToMavenRepository
 
 # ====== 组件模块配置（从 gradle.properties 的 MODULE_NAME 读取） ======
 MODULE_KMP=""
+MODULE_ANDROID=""
 
 # 构建开始时间
 BUILD_START_TIME=0
@@ -107,6 +108,27 @@ if [ -f "${GRADLE_PROPS}" ]; then
       MODULE_KMP="${PROP_MODULE_NAME}"
     fi
   fi
+
+  if [ -z "${MODULE_ANDROID}" ]; then
+    PROP_ANDROID_MODULE=$(grep '^MODULE_ANDROID=' "${GRADLE_PROPS}" 2>/dev/null | cut -d'=' -f2 || true)
+    if [ -n "${PROP_ANDROID_MODULE}" ]; then
+      MODULE_ANDROID="${PROP_ANDROID_MODULE}"
+    fi
+  fi
+
+  if [ -z "${KUIKLY_CORE_SHORT_VERSION}" ] || [ "${KUIKLY_CORE_SHORT_VERSION}" = "2.7.0" ]; then
+    PROP_CORE_VERSION=$(grep '^KUIKLY_CORE_VERSION=' "${GRADLE_PROPS}" 2>/dev/null | cut -d'=' -f2 || true)
+    if [ -n "${PROP_CORE_VERSION}" ]; then
+      KUIKLY_CORE_SHORT_VERSION="${PROP_CORE_VERSION}"
+    fi
+  fi
+
+  if [ -z "${KUIKLY_OHOS_VERSION_SUFFIX}" ] || [ "${KUIKLY_OHOS_VERSION_SUFFIX}" = "2.0.21-ohos" ]; then
+    PROP_OHOS_SUFFIX=$(grep '^KUIKLY_OHOS_VERSION_SUFFIX=' "${GRADLE_PROPS}" 2>/dev/null | cut -d'=' -f2 || true)
+    if [ -n "${PROP_OHOS_SUFFIX}" ]; then
+      KUIKLY_OHOS_VERSION_SUFFIX="${PROP_OHOS_SUFFIX}"
+    fi
+  fi
 fi
 
 # ====== 函数定义 ======
@@ -122,7 +144,8 @@ function usage() {
   echo "  -v, --version       指定发布版本号, 默认读取 gradle.properties 中 MAVEN_VERSION"
   echo "  -g, --group-id      指定 Group ID, 默认读取 gradle.properties 中 GROUP_ID"
   echo "  -k, --kotlin        指定编译的 Kotlin 版本列表, 使用 , 分割"
-  echo "  -ok, --ohos-kotlin  指定鸿蒙 Kotlin 版本列表, 使用 , 分割"
+  echo "  -ok, --ohos-kotlin  指定鸿蒙 Kotlin 版本列表, 使用 , 分割
+  -kv, --core-version 指定 Kuikly Core 短版本号, 默认读取 gradle.properties"
   echo "  -s, --snapshot      指定是否 SNAPSHOT (true/false)"
   echo "  -l, --local-repo    指定是否发布到本地 repo (true/false)"
   echo "  -m, --maven-url     指定 Maven 仓库地址"
@@ -146,7 +169,7 @@ function log_error() {
 
 function get_kuikly_core_version() {
   local kotlin_version="$1"
-  echo "${DEFAULT_KUIKLY_CORE_VERSION}-${kotlin_version}"
+  echo "${KUIKLY_CORE_SHORT_VERSION}-${kotlin_version}"
 }
 
 function start_timer() {
@@ -217,7 +240,11 @@ function publishModule() {
   local enable_ohos="${5:-false}"
 
   local core_version
-  core_version=$(get_kuikly_core_version "${kt_version}")
+  if [ "${enable_ohos}" = "true" ]; then
+    core_version="${KUIKLY_CORE_SHORT_VERSION}-${KUIKLY_OHOS_VERSION_SUFFIX}"
+  else
+    core_version=$(get_kuikly_core_version "${kt_version}")
+  fi
 
   local common_args
   common_args=$(build_gradle_args)
@@ -263,6 +290,13 @@ function publishAll() {
     # 发布跨端模块
     if ! publishModule "${MODULE_KMP}" "${PUBLISH_TASK}" "${kt_version}" "${build_version}" "false"; then
       return 1
+    fi
+
+    # 发布 Android 原生模块
+    if [[ -n "${MODULE_ANDROID}" ]]; then
+      if ! publishModule "${MODULE_ANDROID}" "publishReleasePublicationToMavenRepository" "${kt_version}" "${build_version}" "false"; then
+        return 1
+      fi
     fi
 
     if [[ -z "${final_versions}" ]]; then
@@ -326,6 +360,7 @@ while [[ "$#" -gt 0 ]]; do
   -g | --group-id) shift; GROUP_ID="${1}" ;;
   -k | --kotlin) shift; KOTLIN_VERSION_LIST="${1}" ;;
   -ok | --ohos-kotlin) shift; OHOS_KOTLIN_VERSION_LIST="${1}" ;;
+  -kv | --core-version) shift; KUIKLY_CORE_SHORT_VERSION="${1}" ;;
   -s | --snapshot) shift; PUB_ENABLE_SNAPSHOT="$1" ;;
   -l | --local-repo) shift; PUB_IS_LOCAL_REPO="$1" ;;
   -m | --maven-url) shift; MAVEN_URL="$1" ;;
@@ -341,10 +376,13 @@ done
 echo ""
 log_info "========== ${MODULE_KMP} 发布配置 =========="
 log_info "组件模块:     ${MODULE_KMP}"
+log_info "Android模块:  ${MODULE_ANDROID}"
 log_info "版本号:       ${BASE_VERSION}"
 log_info "Group ID:     ${GROUP_ID:-未设置(使用 gradle.properties 配置)}"
 log_info "Kotlin 版本:  ${KOTLIN_VERSION_LIST}"
 log_info "OHOS Kotlin:  ${OHOS_KOTLIN_VERSION_LIST}"
+log_info "Core 版本:    ${KUIKLY_CORE_SHORT_VERSION}"
+log_info "Core Ohos后缀: ${KUIKLY_OHOS_VERSION_SUFFIX}"
 log_info "SNAPSHOT:     ${PUB_ENABLE_SNAPSHOT:-未设置}"
 log_info "本地仓库:     ${PUB_IS_LOCAL_REPO:-未设置}"
 log_info "Maven URL:    ${MAVEN_URL:-未设置(使用 gradle.properties 配置)}"
