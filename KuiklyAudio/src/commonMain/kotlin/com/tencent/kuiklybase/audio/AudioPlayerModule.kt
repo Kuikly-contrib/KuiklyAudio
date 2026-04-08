@@ -47,7 +47,7 @@ class AudioPlayerModule : Module() {
 
     // ======================== 内部缓存状态 ========================
 
-    /** 当前播放状态：idle / playing / paused / stopped / completed / error */
+    /** 当前播放状态：idle / buffering / playing / paused / stopped / completed / error */
     var state: String = "idle"
         private set
 
@@ -86,6 +86,9 @@ class AudioPlayerModule : Module() {
 
     /** 是否处于暂停状态 */
     val isPaused: Boolean get() = state == "paused"
+
+    /** 是否正在缓冲 */
+    val isBuffering: Boolean get() = state == "buffering"
 
     /** 播放进度 0.0 ~ 1.0，未播放时为 0 */
     val progress: Float get() = if (totalDuration > 0) (position.toFloat() / totalDuration.toFloat()).coerceIn(0f, 1f) else 0f
@@ -355,6 +358,30 @@ class AudioPlayerModule : Module() {
         return result.toLongOrNull() ?: 0L
     }
 
+    /** 同步查询当前音量（0.0 ~ 1.0） */
+    fun getVolume(): Float {
+        val result =
+            toNative(
+                keepCallbackAlive = false,
+                methodName = METHOD_GET_VOLUME,
+                param = null,
+                syncCall = true,
+            )?.toString() ?: "1.0"
+        return result.toFloatOrNull() ?: 1.0f
+    }
+
+    /** 同步查询当前播放速度（0.5 ~ 2.0） */
+    fun getSpeed(): Float {
+        val result =
+            toNative(
+                keepCallbackAlive = false,
+                methodName = METHOD_GET_SPEED,
+                param = null,
+                syncCall = true,
+            )?.toString() ?: "1.0"
+        return result.toFloatOrNull() ?: 1.0f
+    }
+
     // ======================== 工具方法 ========================
 
     private fun asyncToNativeMethod(
@@ -389,6 +416,8 @@ class AudioPlayerModule : Module() {
         private const val METHOD_GET_PLAY_STATE = "getPlayState"
         private const val METHOD_GET_CURRENT_POSITION = "getCurrentPosition"
         private const val METHOD_GET_DURATION = "getDuration"
+        private const val METHOD_GET_VOLUME = "getVolume"
+        private const val METHOD_GET_SPEED = "getSpeed"
         private const val METHOD_ON_TIME_UPDATE = "onTimeUpdate"
         private const val METHOD_ON_PLAY_STATE_CHANGED = "onPlayStateChanged"
         private const val METHOD_ON_ERROR = "onError"

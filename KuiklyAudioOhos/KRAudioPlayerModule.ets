@@ -112,6 +112,10 @@ export class KRAudioPlayerModule extends KuiklyRenderBaseModule {
       case 'onError':
         this.errorCallback = callback;
         break;
+      case 'getVolume':
+        return this.avPlayer ? this.avPlayer.volume.toString() : '1.0';
+      case 'getSpeed':
+        return this.avPlayer ? this.avPlayer.speed.toString() : '1.0';
       case 'onPlaylistIndexChanged':
         this.playlistIndexCallback = callback;
         break;
@@ -267,7 +271,7 @@ export class KRAudioPlayerModule extends KuiklyRenderBaseModule {
    */
   private isPlayerReady(): boolean {
     const state = this.lastReportedState;
-    return state === 'prepared' || state === 'playing' || state === 'paused' || state === 'completed';
+    return state === 'buffering' || state === 'playing' || state === 'paused' || state === 'completed';
   }
 
   private mapSpeed(speed: number): media.PlaybackSpeed {
@@ -442,8 +446,8 @@ export class KRAudioPlayerModule extends KuiklyRenderBaseModule {
           // url 设置后自动进入 initialized，等待 prepared
           break;
         case 'prepared':
-          // prepared 后设置播放模式，然后自动播放
-          this.reportStateIfChanged('prepared');
+          // prepared 表示数据已缓冲准备好，映射为 buffering（等待真正 playing）
+          this.reportStateIfChanged('buffering');
           if (this.playMode === 'single' && this.avPlayer) {
             this.avPlayer.loop = true;
           }
@@ -551,7 +555,9 @@ export class KRAudioPlayerModule extends KuiklyRenderBaseModule {
     if (this.session && this.backgroundPlayEnabled) {
       const sessionState = state === 'playing'
         ? avSession.PlaybackState.PLAYBACK_STATE_PLAY
-        : avSession.PlaybackState.PLAYBACK_STATE_PAUSE;
+        : state === 'buffering'
+          ? avSession.PlaybackState.PLAYBACK_STATE_PLAY
+          : avSession.PlaybackState.PLAYBACK_STATE_PAUSE;
       this.session.setAVPlaybackState({ state: sessionState });
     }
   }

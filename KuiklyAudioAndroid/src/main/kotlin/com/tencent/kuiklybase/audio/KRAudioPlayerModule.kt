@@ -60,6 +60,8 @@ class KRAudioPlayerModule : KuiklyRenderBaseModule() {
             "getPlayState" -> getPlayStateString()
             "getCurrentPosition" -> (player?.currentPosition ?: 0L).toString()
             "getDuration" -> (player?.duration?.takeIf { it > 0 } ?: 0L).toString()
+            "getVolume" -> (player?.volume?.toString() ?: "1.0")
+            "getSpeed" -> (player?.playbackParameters?.speed?.toString() ?: "1.0")
             "onTimeUpdate" -> { timeUpdateCallback = callback; null }
             "onPlayStateChanged" -> { playStateCallback = callback; null }
             "onError" -> { errorCallback = callback; null }
@@ -237,7 +239,7 @@ class KRAudioPlayerModule : KuiklyRenderBaseModule() {
             when (playbackState) {
                 Player.STATE_IDLE -> reportStateIfChanged("idle")
                 Player.STATE_BUFFERING -> {
-                    // 缓冲中不改变状态，避免 playing/paused 闪烁
+                    reportStateIfChanged("buffering")
                 }
                 Player.STATE_READY -> {
                     if (player?.isPlaying == true) {
@@ -346,6 +348,7 @@ class KRAudioPlayerModule : KuiklyRenderBaseModule() {
         return when {
             p.playbackState == Player.STATE_ENDED -> "completed"
             p.isPlaying -> "playing"
+            p.playbackState == Player.STATE_BUFFERING -> "buffering"
             p.playbackState == Player.STATE_READY -> "paused"
             p.playbackState == Player.STATE_IDLE -> "idle"
             else -> "idle"

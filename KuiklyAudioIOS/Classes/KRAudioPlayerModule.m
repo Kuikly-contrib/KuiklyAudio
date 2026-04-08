@@ -3,6 +3,7 @@
 #import <MediaPlayer/MediaPlayer.h>
 
 static NSString * const kStateIdle = @"idle";
+static NSString * const kStateBuffering = @"buffering";
 static NSString * const kStatePlaying = @"playing";
 static NSString * const kStatePaused = @"paused";
 static NSString * const kStateStopped = @"stopped";
@@ -78,6 +79,10 @@ static NSString * const kStateError = @"error";
         return [self getCurrentPositionString];
     } else if ([method isEqualToString:@"getDuration"]) {
         return [self getDurationString];
+    } else if ([method isEqualToString:@"getVolume"]) {
+        return [self getVolumeString];
+    } else if ([method isEqualToString:@"getSpeed"]) {
+        return [self getSpeedString];
     } else if ([method isEqualToString:@"onTimeUpdate"]) {
         self.timeUpdateCallback = callback;
     } else if ([method isEqualToString:@"onPlayStateChanged"]) {
@@ -125,7 +130,8 @@ static NSString * const kStateError = @"error";
     
     [self addPlayerObservers];
     [self.player play];
-    [self updateState:kStatePlaying];
+    // 先报 buffering，等 AVPlayerItem status 变为 ReadyToPlay 后再报 playing
+    [self updateState:kStateBuffering];
     [self updateNowPlayingInfo:title artist:artist coverUrl:coverUrl];
 }
 
@@ -295,6 +301,24 @@ static NSString * const kStateError = @"error";
                                                  name:AVPlayerItemFailedToPlayToEndTimeNotification
                                                object:self.currentItem];
     
+    // AVPlayerItem status 观察（用于检测 buffering）
+    [self.currentItem addObserver:self
+                        forKeyPath:@"status"
+                           options:NSKeyValueObservingOptionNew
+                           context:nil];
+    
+    // AVPlayerItem loadedTimeRanges 观察（用于检测缓冲进度）
+    [self.currentItem addObserver:self
+                        forKeyPath:@"loadedTimeRanges"
+                           options:NSKeyValueObservingOptionNew
+                           context:nil];
+    
+    // AVPlayer rate 观察（用于检测播放/暂停状态变化）
+    [self.player addObserver:self
+                  forKeyPath:@"rate"
+                     options:NSKeyValueObservingOptionNew
+                     context:nil];
+    
     // 进度定时回调（500ms）
     __weak typeof(self) weakSelf = self;
     CMTime interval = CMTimeMakeWithSeconds(0.5, NSEC_PER_SEC);
@@ -312,7 +336,44 @@ static NSString * const kStateError = @"error";
     [[NSNotificationCenter defaultCenter] removeObserver:self
                                                     name:AVPlayerItemFailedToPlayToEndTimeNotification
                                                   object:nil];
+    [self.currentItem removeObserver:self forKeyPath:@"status"];
+    [self.currentItem removeObserver:self forKeyPath:@"loadedTimeRanges"];
+    [self.player removeObserver:self forKeyPath:@"rate"];
     [self removeTimeObserver];
+}
+
+// KVO 回调
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
+    if ([keyPath isEqualToString:@"status"]) {
+        AVPlayerItem *item = object;
+        if (item.status == AVPlayerItemStatusReadyToPlay) {
+            // Item 准备好了，如果 player 正在播放则状态为 playing，否则为 paused
+            if (self.player.rate > 0) {
+                [self updateState:kStatePlaying];
+            } else {
+                [self updateState:kStatePaused];
+            }
+        } else if (item.status == AVPlayerItemStatusFailed) {
+            [self updateState:kStateError];
+            if (self.errorCallback) {
+                self.errorCallback(@{
+                    @"code": [@(item.error.code) stringValue] ?: @"-1",
+                    @"message": item.error.localizedDescription ?: @"Unknown error"
+                });
+            }
+        } else {
+            // AVPlayerItemStatusUnknown - 正在缓冲
+            [self updateState:kStateBuffering];
+        }
+    } else if ([keyPath isEqualToString:@"rate"]) {
+        // 播放/暂停状态变化
+        AVPlayer *player = object;
+        if (player.rate > 0) {
+            [self updateState:kStatePlaying];
+        } else if (self.currentItem.status == AVPlayerItemStatusReadyToPlay) {
+            [self updateState:kStatePaused];
+        }
+    }
 }
 
 - (void)removeTimeObserver {
@@ -390,6 +451,16 @@ static NSString * const kStateError = @"error";
     if (!CMTIME_IS_VALID(dur) || CMTIME_IS_INDEFINITE(dur)) return @"0";
     long long ms = (long long)(CMTimeGetSeconds(dur) * 1000);
     return [@(MAX(0, ms)) stringValue];
+}
+
+- (NSString *)getVolumeString {
+    if (!self.player) return @"1.0";
+    return [@(self.player.volume) stringValue];
+}
+
+- (NSString *)getSpeedString {
+    if (!self.player) return @"1.0";
+    return [@(self.player.rate) stringValue];
 }
 
 #pragma mark - 锁屏控制
