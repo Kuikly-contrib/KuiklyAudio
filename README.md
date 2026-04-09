@@ -36,7 +36,6 @@ dependencies {
 
 ### 2. Android 端
 
-**Maven 依赖（在 app 的 build.gradle.kts）：**
 ```kotlin
 dependencies {
     // KuiklyAudio Android 原生实现
@@ -57,8 +56,6 @@ override fun registerExternalModule(kuiklyRenderExport: IKuiklyRenderExport) {
 
 ### 3. iOS 端
 
-**方式一：CocoaPods（推荐）**
-
 在 Podfile 中添加：
 ```ruby
 pod 'KuiklyAudio', :git => 'https://github.com/Kuikly-contrib/KuiklyAudio.git', :branch => 'main'
@@ -69,16 +66,14 @@ pod 'KuiklyAudio', :git => 'https://github.com/Kuikly-contrib/KuiklyAudio.git', 
 
 ### 4. 鸿蒙端
 
-**HAR 包引入（待发布）：**
 
 在 `oh-package.json5` 中添加依赖：
 ```json5
 "dependencies": {
-    "@kuikly-open/kuikly-audio": "1.0.0"
+    "@yuki8273/kuikly-audio": "1.0.0"
 }
 ```
 
-> HAR 包发布到 ohpm 仓库后即可通过此方式引入，目前可先手动复制 `KuiklyAudioOhos/KRAudioPlayerModule.ets` 到项目中。
 
 **注册 Module（在 Adapter 中）：**
 ```typescript

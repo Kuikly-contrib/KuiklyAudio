@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "description": "Please describe the basic information.",
   "main": "",
-  "author": "",
-  "license": "",
+  "author": "Kuikly",
+  "license": "MIT",
   "dependencies": {
   },
   "devDependencies": {
