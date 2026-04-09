@@ -66,8 +66,14 @@ pod 'KuiklyAudio', :git => 'https://github.com/Kuikly-contrib/KuiklyAudio.git', 
 
 ### 4. 鸿蒙端
 
+**在build.ohos.gradle.kts中引入依赖：**
+```kotlin
+dependencies {
+    implementation("com.tencent.kuiklybase:KuiklyAudio:1.0.0-2.0.21-KBA-010")
+}
+```
 
-在 `oh-package.json5` 中添加依赖：
+**原生层依赖**，在 `oh-package.json5` 中添加：
 ```json5
 "dependencies": {
     "@yuki8273/kuikly-audio": "1.0.0"
