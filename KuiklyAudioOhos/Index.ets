@@ -1,1 +1,1 @@
-export { KRAudioPlayerModule } from './KRAudioPlayerModule'
+export { KRAudioPlayerModule } from './src/main/ets/KRAudioPlayerModule'
