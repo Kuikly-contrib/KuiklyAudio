@@ -50,6 +50,8 @@ export class KRAudioPlayerModule extends KuiklyRenderBaseModule {
   private playMode: string = 'sequence';
   private backgroundPlayEnabled: boolean = false;
   private lastReportedState: string = 'idle';
+  private currentVolume: number = 1.0;
+  private currentSpeed: number = 1.0;
 
   // AVSession
   private session: avSession.AVSession | null = null;
@@ -113,9 +115,9 @@ export class KRAudioPlayerModule extends KuiklyRenderBaseModule {
         this.errorCallback = callback;
         break;
       case 'getVolume':
-        return this.avPlayer ? this.avPlayer.volume.toString() : '1.0';
+        return this.currentVolume.toString();
       case 'getSpeed':
-        return this.avPlayer ? this.avPlayer.speed.toString() : '1.0';
+        return this.currentSpeed.toString();
       case 'onPlaylistIndexChanged':
         this.playlistIndexCallback = callback;
         break;
@@ -250,6 +252,7 @@ export class KRAudioPlayerModule extends KuiklyRenderBaseModule {
     const json = this.parseParams(params);
     if (!json) return;
     const volume = Math.max(0, Math.min(1, parseFloat(json.volume || '1.0')));
+    this.currentVolume = volume;
     if (this.avPlayer) {
       this.avPlayer.setVolume(volume);
     }
@@ -260,6 +263,7 @@ export class KRAudioPlayerModule extends KuiklyRenderBaseModule {
     const json = this.parseParams(params);
     if (!json) return;
     const speed = Math.max(0.5, Math.min(2.0, parseFloat(json.speed || '1.0')));
+    this.currentSpeed = speed;
     if (this.avPlayer) {
       this.avPlayer.setSpeed(this.mapSpeed(speed));
     }

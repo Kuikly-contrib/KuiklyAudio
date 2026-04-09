@@ -17,6 +17,9 @@ Pods/*
 Pods-iosApp/*
 Kotlin-js-store
 static_server/node_modules
+node_modules
+oh_modules
+.hvigor
 
 ## KSP generated files
 **/build/generated/**

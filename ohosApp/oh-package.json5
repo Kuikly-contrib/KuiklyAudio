@@ -7,6 +7,7 @@
   "author": "Kuikly",
   "license": "MIT",
   "dependencies": {
+    "@yuki8273/kuikly-audio": "file:../KuiklyAudioOhos"
   },
   "devDependencies": {
     "@ohos/hypium": "1.0.15",

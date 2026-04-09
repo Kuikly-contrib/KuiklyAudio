@@ -1,0 +1,10 @@
+{
+  "module": {
+    "name": "KuiklyAudioOhos",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet"
+    ]
+  }
+}

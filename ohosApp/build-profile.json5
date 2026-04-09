@@ -36,6 +36,18 @@
           ]
         }
       ]
+    },
+    {
+      "name": "KuiklyAudioOhos",
+      "srcPath": "../KuiklyAudioOhos",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
     }
   ]
 }

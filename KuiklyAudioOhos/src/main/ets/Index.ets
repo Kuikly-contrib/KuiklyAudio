@@ -1,0 +1,1 @@
+export { KRAudioPlayerModule } from './KRAudioPlayerModule'
