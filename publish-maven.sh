@@ -47,6 +47,9 @@ OHOS_KOTLIN_VERSION_LIST=""
 # Kuikly Core 鸿蒙版本后缀（从 gradle.properties 读取）
 KUIKLY_OHOS_VERSION_SUFFIX="2.0.21-ohos"
 
+# Kuikly Core 短版本号（从 gradle.properties 读取，可通过 -kv 参数覆盖）
+KUIKLY_CORE_SHORT_VERSION="2.7.0"
+
 # publish 任务
 PUBLISH_TASK=publishAllPublicationsToMavenRepository
 

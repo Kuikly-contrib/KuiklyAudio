@@ -4,6 +4,6 @@ plugins {
     id("com.android.library").version("7.4.2").apply(false)
     kotlin("android").version(Version.getKotlinOhosCompilerVersion()).apply(false)
     kotlin("multiplatform").version(Version.getKotlinOhosCompilerVersion()).apply(false)
-    id("com.google.devtools.ksp").version("${Version.getKotlinOhosCompilerVersion()}-1.0.27").apply(false)
+    id("com.google.devtools.ksp").version("2.0.21-1.0.27").apply(false)
 
 }

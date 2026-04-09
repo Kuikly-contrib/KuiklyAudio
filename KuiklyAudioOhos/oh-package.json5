@@ -1,0 +1,9 @@
+{
+  "name": "@yuki8273/kuikly-audio",
+  "version": "1.0.0",
+  "description": "Kuikly 音频播放组件鸿蒙原生实现",
+  "main": "KRAudioPlayerModule.ets",
+  "author": "yuki8273",
+  "license": "MIT",
+  "dependencies": {}
+}

@@ -10,7 +10,6 @@
 - **播放列表**：多曲目切换，支持 next / previous
 - **播放模式**：顺序播放 / 单曲循环 / 列表循环
 - **后台播放**：Android Foreground Service / iOS Audio Background Mode / 鸿蒙长时任务
-- **锁屏控制**：显示曲目信息（标题、艺术家、封面），响应锁屏播放按钮
 - **音量控制**：0.0 ~ 1.0，支持同步查询当前音量
 - **倍速控制**：0.5x ~ 2.0x，支持同步查询当前倍速
 
@@ -62,23 +61,24 @@ override fun registerExternalModule(kuiklyRenderExport: IKuiklyRenderExport) {
 
 在 Podfile 中添加：
 ```ruby
-pod 'KuiklyAudio', '~> 1.0.0'
+pod 'KuiklyAudio', :git => 'https://github.com/Kuikly-contrib/KuiklyAudio.git', :branch => 'main'
 ```
 
-**方式二：手动复制**
-
-将 `KuiklyAudioIOS/Classes/` 下的 `.h` 和 `.m` 文件添加到 Xcode 项目。
-
-**⚠️ iOS 后台播放配置：**
-- 在 Xcode 中打开 Target → Signing & Capabilities → + Background Modes → 勾选 Audio
-- 或在 Info.plist 中添加 `UIBackgroundModes: audio`
 
 **iOS 无需手动注册 Module**，框架通过类名 `KRAudioPlayerModule` 自动发现。
 
 ### 4. 鸿蒙端
 
-**复制原生 Module 文件：**
-- 将 `KuiklyAudioOhos/KRAudioPlayerModule.ets` 添加到鸿蒙项目中
+**HAR 包引入（待发布）：**
+
+在 `oh-package.json5` 中添加依赖：
+```json5
+"dependencies": {
+    "@kuikly-open/kuikly-audio": "1.0.0"
+}
+```
+
+> HAR 包发布到 ohpm 仓库后即可通过此方式引入，目前可先手动复制 `KuiklyAudioOhos/KRAudioPlayerModule.ets` 到项目中。
 
 **注册 Module（在 Adapter 中）：**
 ```typescript
